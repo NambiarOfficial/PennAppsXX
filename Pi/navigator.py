@@ -13,6 +13,7 @@ import threading
 from googleAPI import detect_text, detect_landmarks, detect_document, detect_emotion, search_object
 import time
 import requests
+from twilio_test import send_msg
 
 GPIO.setmode(GPIO.BOARD)
 prev_time_nav = time.time()
@@ -284,6 +285,8 @@ def object_detect_pi():
 	t1.start()
 	return s
 
+def send_sos():
+	send_msg("SOS! Send help to my location")
 '''
 	SET PUSH BUTTON PINS AND CALLBACKS
 '''
@@ -296,7 +299,7 @@ modes = {
 	1:['Read Text',ocr],
 	2:['Event Description',event],
 	3:['Object Detect',object_detect_pi]
-	# 4:['Toggle lights',]
+	4:['Send SOS',send_sos]
 	}
 num_modes = len(modes.keys())
 def counter_callback(channel):

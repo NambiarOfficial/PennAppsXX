@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from twilio_test import send_msg
 
 
 TEMP_FOLDER='./temp'
@@ -43,6 +44,11 @@ def test_no():
 	On calling No Intent
 	'''
 	return statement("Thats a no from me")
+
+@ask.intent("SendTextIntent")
+def send_text(text_name):
+	send_msg('Hi')
+	return statement("Message has been sent to "+name)
 
 @ask.intent('NavigateIntent',mapping={'dest':'Location'})
 def alexa_nav(dest):
@@ -249,6 +255,8 @@ def voice():
 		ocr()
 	elif 'handwriting' in text:
 		handwriting()
+	elif 'text' in text:
+		send_msg('hi')
 	return '1'
 
 def ocr():
