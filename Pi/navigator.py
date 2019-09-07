@@ -14,6 +14,9 @@ from googleAPI import detect_text, detect_landmarks, detect_document, detect_emo
 import time
 import requests
 from twilio_test import send_msg
+from transactions import create_transaction
+from pyzbar.pyzbar import decode
+import cv2
 
 GPIO.setmode(GPIO.BOARD)
 prev_time_nav = time.time()
@@ -225,6 +228,8 @@ def emotion():
 def event():
 	event_des = event_description()
 	print(event_des)
+	if 'fire' in event_des or 'smok' in event_des:
+		send_sos()
 	t1 = threading.Thread(target=t2s, args=(event_des,))
 	t1.start()
 	return event_des
@@ -286,7 +291,17 @@ def object_detect_pi():
 	return s
 
 def send_sos():
-	send_msg("SOS! Send help to my location")
+	send_msg("SOS! Send help to my location - (39.951681, -75.191207)")
+	t2s("Emergency services have been alerted and are on their way. Remain calm.")
+
+def payment():
+	cap = cv2.VideoCapture(0)
+	_. frame = cap.read()
+	cap.release()
+	data = decode(frame).data.decode('utf-8')
+	receiver,amount = data.spilt(',')
+	create_transaction('Spidey',receiver,amount,'Payment made to merchant')
+	t2s('Payment of '+amount+' made to '+receiver)
 '''
 	SET PUSH BUTTON PINS AND CALLBACKS
 '''
@@ -299,7 +314,8 @@ modes = {
 	1:['Read Text',ocr],
 	2:['Event Description',event],
 	3:['Object Detect',object_detect_pi]
-	4:['Send SOS',send_sos]
+	4:['Send SOS',send_sos],
+	5:['Pay merchant', payment]
 	}
 num_modes = len(modes.keys())
 def counter_callback(channel):

@@ -21,7 +21,7 @@ def send_msg(text):
 	message = client.messages.create( 
 								from_='+12053031167',  
 								body=text,      
-								to='+16318292196'
+								to='+919655558174'
 							) 
  
 	print(message.sid)

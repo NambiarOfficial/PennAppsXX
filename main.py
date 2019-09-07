@@ -10,7 +10,7 @@ from twilio_test import send_msg
 
 
 TEMP_FOLDER='./temp'
-app = Flask('Alfred Pennyworth')
+app = Flask('Third Eye')
 ask = Ask(app,'/alexa')
 nodes = {'bathroom': '192.168.43.23'}
 pi_ip = "http://192.168.43.138:5000"
@@ -25,7 +25,7 @@ ALEXA INTENTS
 @ask.launch
 def alexa_welcome():
 	'''
-	Renders the welcome message on calling Alexa as 'Start Alfred Pennyworth'
+	Renders the welcome message on calling Alexa as 'Start Third Eye'
 	'''
 	welcome = render_template('welcome')
 	reprompt = render_template('reprompt')
@@ -49,6 +49,11 @@ def test_no():
 def send_text(text_name):
 	send_msg('Hi')
 	return statement("Message has been sent to "+name)
+
+@ask.intent("SOSIntent")
+def sos():
+	send_msg("Send help to my location")
+	return statement("Emergency services have been alerted. They are on their way.")
 
 @ask.intent('NavigateIntent',mapping={'dest':'Location'})
 def alexa_nav(dest):
@@ -227,6 +232,18 @@ def gsm_test():
 	lon = request.args.get('longitude')
 	print(request.remote_addr)
 	print(temp,humid,lat,lon)
+	return '1'
+
+# GETTING DATA FROM United States Geological Survey ON EARTHQUAKE ALERTS NEAR ME
+@app.route('/earthquake_news')
+def earthquake_alert():
+	send_msg("Send help to my location.")
+	# return '1'
+
+@app.route('/pulse',methods=['POST'])
+def pulse():
+	p = int(request.form.get('pulse'))
+	print(p)
 	return '1'
 
 @app.route('/voice',methods=['POST'])
