@@ -11,10 +11,9 @@
 
 # print(message.sid)
 
-from twilio.rest import Client 
+from twilio.rest import Client
+from credentials import account_sid, auth_token
  
-account_sid = 'AC57bc9b762fce7d203cc00ccd765cbe7f' 
-auth_token = '171356b0d99c9bf3b1fb57498803d919' 
 client = Client(account_sid, auth_token) 
 # text = input("What is the message?\n")
 
