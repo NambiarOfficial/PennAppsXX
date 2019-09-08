@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<style>
+	.card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  width: 200px;
+  float: left;
+  padding-right: 20px;
+  padding-bottom: 40px;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+/* Add some padding inside the card container */
+.container {
+  padding: 2px 16px;
+}
+
+button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+</style>
+<html>
+<head>
+	<title>The Third Eye - PennAppsXX</title>
+</head>
+<body>
+	<div id='main_div'></div>
+	<div id='random'></div>
+	<div align="center">
+		<button onclick="random_feature()">Random Feature</button>
+		<button onclick="location.reload()">Reset</button>
+	</div>
+	<script>
+	var features = {
+			'Navigation' : ['Go from room to room, without any assistance','presentation_pics/navigation.jpg'],
+			'Face Recognition' : ['Identify your friends and family in front of you','presentation_pics/face_recognition.jpg'],
+			'Read Aloud' : ['Using OCR, read items in front of you','presentation_pics/ocr.jpeg'],
+			'Activity Recognition' : ['Never miss a moment with this feature','presentation_pics/event.jpg'],
+			'Object Detection' : ['Identify all objects in front of you','presentation_pics/object_detection.jpg'],
+			'Object Locator' : ['Know the relative position of an object','presentation_pics/object_detection.jpg'],
+			'S.O.S' : ['In case of any emergency, alert the authorities','presentation_pics/sos.jpg'],
+			'Hazard Detection' : ['Alerts in case of hazard','presentation_pics/hazard.png'],
+			'Text A Friend' : ['Instantly contact your friends','presentation_pics/text.png'],
+			'EZ Shopping' : ['Payments made easier with this feature','presentation_pics/pay.png'],
+			'Home Automation' : ['Automate the lights and fans in your house','presentation_pics/home.jpg'],
+			'Health' : ['Monitor you basic health parameters and identify abnormalities','presentation_pics/heart.jpg'],
+			};
+		md = document.getElementById('main_div');
+		for(var feat in features) {
+			md.innerHTML += '<div class="card"><img src="'+features[feat][1]+'" alt="Avatar" width="200" height="100"><div class="container"><h4><b>'+feat+'</b></h4><p>'+features[feat][0]+'</p></div></div>';
+		}
+
+		function random_feature() {
+			var l = Object.keys(features).length;
+			var num = Math.floor(Math.random()*l);
+			md = document.getElementById('main_div');
+			md.style.display = "none";
+
+			rand = document.getElementById('random');
+			var f = Object.keys(features)[num];
+			rand.innerHTML = '<div class="card"><img src="'+features[f][1]+'" alt="Avatar" width="200" height="100"><div class="container"><h4><b>'+f+'</b></h4><p>'+features[f][0]+'</p></div></div>';
+
+		}
+		/*
+		<div class="card">
+  		// <img src="img_avatar.png" alt="Avatar" style="width:100%">
+		  <div class="container">
+		    <h4><b>John Doe</b></h4>
+		    <p>Architect & Engineer</p>
+		  </div>
+		</div>
+		*/
+	</script>
+</body>
+</html>
