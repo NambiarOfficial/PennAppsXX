@@ -294,6 +294,7 @@ def send_sos():
 	send_msg("SOS! Send help to my location - (39.951681, -75.191207)")
 	t2s("Emergency services have been alerted and are on their way. Remain calm.")
 
+@app.route('/payment')
 def payment():
 	cap = cv2.VideoCapture(0)
 	_. frame = cap.read()
@@ -301,7 +302,10 @@ def payment():
 	data = decode(frame).data.decode('utf-8')
 	receiver,amount = data.spilt(',')
 	create_transaction('Spidey',receiver,amount,'Payment made to merchant')
-	t2s('Payment of '+amount+' made to '+receiver)
+	s = 'Payment of '+amount+' made to '+receiver
+	t1 = threading.Thread(target=t2s,args=(s,))
+	t1.start()
+	return '1'
 '''
 	SET PUSH BUTTON PINS AND CALLBACKS
 '''

@@ -48,6 +48,11 @@ def test_no():
 	'''
 	return statement("Thats a no from me")
 
+@ask.intent('PaymentIntent')
+def payment():
+	r = requests.get(pi_ip+'/payment')
+	return statement('Payment is being processed.')
+
 @ask.intent("SendTextIntent")
 def send_text(text_name):
 	send_msg('Hi')
@@ -291,6 +296,8 @@ def voice():
 		handwriting()
 	elif 'text' in text:
 		send_msg('hi')
+	elif 'pay' in text:
+		payment()
 	return '1'
 
 def ocr():
