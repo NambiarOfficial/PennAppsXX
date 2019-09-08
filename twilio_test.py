@@ -26,7 +26,15 @@ def send_msg(text):
  
 	print(message.sid)
 
+def call():
+	call = client.calls.create(
+                        from_='+12053031167',
+                        url='http://demo.twilio.com/docs/voice.xml',
+                        to='+919655558174'
+                    )
+	print(call.sid)
 
 if __name__ == '__main__':
-	text = input("Whats the message?")
-	send_msg(text)
+	# text = input("Whats the message?")
+	# send_msg(text)
+	call()

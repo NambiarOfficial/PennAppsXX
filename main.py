@@ -7,6 +7,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from twilio_test import send_msg
+import time
+from heart_beat_code import appropriate_H_R
 
 
 TEMP_FOLDER='./temp'
@@ -14,7 +16,8 @@ app = Flask('Third Eye')
 ask = Ask(app,'/alexa')
 nodes = {'bathroom': '192.168.43.23'}
 pi_ip = "http://192.168.43.138:5000"
-
+pulse_list = []
+pulse_start = time.time()
 @app.route('/test')
 def test():
 	return "Hello"
@@ -242,8 +245,22 @@ def earthquake_alert():
 
 @app.route('/pulse',methods=['POST'])
 def pulse():
+	global pulse_list
+	global pulse_start
 	p = int(request.form.get('pulse'))
 	print(p)
+	if p>550:
+		pulse_list.append(p)
+		if p>900:
+			send_msg("My heart rate is abnormally high. Please help.")
+
+
+	if time.time()-pulse_start>=60:
+		beats = len(pulse_list)
+		print(beats)
+		levels = appropriate_H_R(1,21,beats)
+		pulse_list = []
+		pulse_start = time.time()
 	return '1'
 
 @app.route('/voice',methods=['POST'])
