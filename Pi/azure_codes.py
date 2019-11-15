@@ -25,17 +25,27 @@ remote_image_url = "https://raw.githubusercontent.com/Azure-Samples/cognitive-se
 endpoint = "https://penappsxx.cognitiveservices.azure.com/"
 
 computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(subscription_key))
-local_image = open(local_image_path, "rb")
-imageface=cv2.imread(local_image_path)
-_,enc=cv2.imencode('.jpg',imageface)
-image_data = enc.tobytes()
+#local_image = open(local_image_path, "rb")
+#imageface=cv2.imread(local_image_path)
+#_,enc=cv2.imencode('.jpg',imageface)
+#image_data = enc.tobytes()
+
+def get_image():
+    cap = cv2.VideoCapture(0)
+    _, capture = cap.read()
+    cap.release()
+    capture = cv2.flip(capture,-1)
+    cv2.imwrite(local_image_path,capture)
 
 def describe_image_local():
-    description_result = computervision_client.describe_image_in_stream(local_image)
+    get_image()
+    with open(local_image_path,'rb') as local_image:
+        description_result = computervision_client.describe_image_in_stream(local_image)
     #print("Description of local image: ")
     if (len(description_result.captions) == 0):
         print("No description detected.")
     else:
+        return description_result.captions
         for caption in description_result.captions:
             print("'{}' with confidence {:.2f}%".format(caption.text, caption.confidence * 100))
 # describe_image_local()
@@ -159,10 +169,13 @@ def celebrity():
         for celeb in detect_domain_results_celebs_local.result["celebrities"]:
             print(celeb["name"])
 def landmark():
-    detect_domain_results_landmark_local = computervision_client.analyze_image_by_domain_in_stream("landmarks", local_image)
+    get_image()
+    with open(local_image_path,'rb') as local_image:
+        detect_domain_results_landmark_local = computervision_client.analyze_image_by_domain_in_stream("landmarks", local_image)
     if len(detect_domain_results_landmark_local.result["landmarks"]) == 0:
         print("No landmarks detected.")
     else:
+        return detect_domain_results_landmark_local.result['landmarks']
         for landmark in detect_domain_results_landmark_local.result["landmarks"]:
             print(landmark["name"])
 
@@ -217,10 +230,13 @@ def image_types_url(url):
         print("Image is a line drawing")
 
 def object_detection():
-    detect_objects_results_local = computervision_client.detect_objects_in_stream(local_image)
+    get_image()
+    with open(local_image_path,'rb') as local_image:
+        detect_objects_results_local = computervision_client.detect_objects_in_stream(local_image)
     if len(detect_objects_results_local.objects) == 0:
         print("No objects detected.")
     else:
+        return detect_objects_results_local.objects
         for objectsd in detect_objects_results_local.objects:
             print(objectsd.object_property)
             print("object at location {}, {}, {}, {}".format( \
@@ -261,7 +277,9 @@ def brands_available_url(url):
             brand.rectangle.y, brand.rectangle.y + brand.rectangle.h))
 
 def handwriting_recognition():
-    recognize_handwriting_results = computervision_client.batch_read_file_in_stream(local_image, raw=True)
+    get_image()
+    with open(local_image_path,'rb') as local_image:
+        recognize_handwriting_results = computervision_client.batch_read_file_in_stream(local_image, raw=True)
     operation_location_local = recognize_handwriting_results.headers["Operation-Location"]
     operation_id_local = operation_location_local.split("/")[-1]
     while True:
@@ -291,7 +309,9 @@ def handwriting_recognition_url(url):
                 print(line.bounding_box)
 
 def OCR_Recognition():
-    ocr_result_local = computervision_client.recognize_printed_text_in_stream(local_image)
+    get_image()
+    with open(local_image_path,'rb') as local_image:
+        ocr_result_local = computervision_client.recognize_printed_text_in_stream(local_image)
     for region in ocr_result_local.regions:
         for line in region.lines:
             print("Bounding box: {}".format(line.bounding_box))

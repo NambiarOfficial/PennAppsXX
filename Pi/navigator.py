@@ -10,7 +10,8 @@ from distance import get_ultrasonic
 from ewma import ewma, wma
 import json
 import threading
-from googleAPI import detect_text, detect_landmarks, detect_document, detect_emotion, search_object
+#from googleAPI import detect_text, detect_landmarks, detect_document, detect_emotion, search_object
+from azure_codes import object_detection, describe_image_local, landmark, handwriting_recognition, OCR_Recognition
 import time
 import requests
 from twilio_test import send_msg
@@ -226,7 +227,9 @@ def emotion():
 
 @app.route('/event')
 def event():
-	event_des = event_description()
+	#event_des = event_description()
+	event_des = describe_image_local()
+	event_des = sorted(event_des,key=lambda caption:caption.confidence)[-1].text
 	print(event_des)
 	if 'fire' in event_des or 'smok' in event_des:
 		send_sos()
@@ -238,7 +241,9 @@ def event():
 def object_detect():
 	thing = request.args.get('specific')
 	if thing is None:
-		items = search_object()
+		#items = search_object()
+		items = object_detection()
+		items = [item.object_property for item in items]
 		s = "You are looking at " + ','.join(items)
 	else:
 		loc = search_object(thing)
@@ -251,7 +256,8 @@ def object_detect():
 
 @app.route('/landmark')
 def landmark():
-	landmarks = set(detect_landmarks())
+	#landmarks = set(detect_landmarks())
+	landmarks = set(l['name'] for l in landmark())
 	s = ','.join(landmarks)
 	s1 = "You are looking at "+s
 	t1 = threading.Thread(target=t2s, args=(s1,))
@@ -260,7 +266,8 @@ def landmark():
 
 @app.route('/ocr')
 def ocr():
-	text = detect_text()
+	#text = detect_text()
+	text = OCR_Recognition()
 	print(text)
 	t1 = threading.Thread(target=t2s, args=(text,))
 	t1.start()
@@ -268,7 +275,8 @@ def ocr():
 
 @app.route('/handwritten')
 def handwritten():
-	text = detect_document()
+	#text = detect_document()
+	text = handwriting_detection()
 	t1 = threading.Thread(target=t2s, args=(text,))
 	t1.start()
 	return text
