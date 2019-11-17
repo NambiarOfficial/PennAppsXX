@@ -19,7 +19,7 @@ fontScale              = 0.5
 fontColor              = (0,0,0)
 lineType               = 2
 
-local_image_path = "azure_pic.jpg"
+local_image_path = "/home/pi/PennAppsXX/Pi/azure_pic.jpg"
 remote_image_url = "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/landmark.jpg"
 
 endpoint = "https://penappsxx.cognitiveservices.azure.com/"
@@ -34,13 +34,15 @@ def get_image():
     cap = cv2.VideoCapture(0)
     _, capture = cap.read()
     cap.release()
-    capture = cv2.flip(capture,-1)
+    #capture = cv2.flip(capture,-1)
     cv2.imwrite(local_image_path,capture)
+    print('Pic taken')
 
 def describe_image_local():
     get_image()
-    with open(local_image_path,'rb') as local_image:
-        description_result = computervision_client.describe_image_in_stream(local_image)
+    local_image = open(local_image_path,'rb') #as local_image:
+    description_result = computervision_client.describe_image_in_stream(local_image)
+    local_image.close()
     #print("Description of local image: ")
     if (len(description_result.captions) == 0):
         print("No description detected.")
@@ -170,8 +172,9 @@ def celebrity():
             print(celeb["name"])
 def landmark():
     get_image()
-    with open(local_image_path,'rb') as local_image:
-        detect_domain_results_landmark_local = computervision_client.analyze_image_by_domain_in_stream("landmarks", local_image)
+    local_image = open(local_image_path,'rb') #as local_image:
+    detect_domain_results_landmark_local = computervision_client.analyze_image_by_domain_in_stream("landmarks", local_image)
+    local_image.close()
     if len(detect_domain_results_landmark_local.result["landmarks"]) == 0:
         print("No landmarks detected.")
     else:
@@ -231,8 +234,9 @@ def image_types_url(url):
 
 def object_detection():
     get_image()
-    with open(local_image_path,'rb') as local_image:
-        detect_objects_results_local = computervision_client.detect_objects_in_stream(local_image)
+    local_image = open(local_image_path,'rb') #as local_image:
+    detect_objects_results_local = computervision_client.detect_objects_in_stream(local_image)
+    local_image.close()
     if len(detect_objects_results_local.objects) == 0:
         print("No objects detected.")
     else:
@@ -278,8 +282,9 @@ def brands_available_url(url):
 
 def handwriting_recognition():
     get_image()
-    with open(local_image_path,'rb') as local_image:
-        recognize_handwriting_results = computervision_client.batch_read_file_in_stream(local_image, raw=True)
+    local_image = open(local_image_path,'rb') #as local_image:
+    recognize_handwriting_results = computervision_client.batch_read_file_in_stream(local_image, raw=True)
+    local_image.close()
     operation_location_local = recognize_handwriting_results.headers["Operation-Location"]
     operation_id_local = operation_location_local.split("/")[-1]
     while True:
@@ -287,11 +292,14 @@ def handwriting_recognition():
         if recognize_handwriting_result.status not in ['NotStarted', 'Running']:
             break
         time.sleep(1)
+    s=''
     if recognize_handwriting_result.status == TextOperationStatusCodes.succeeded:
         for text_result in recognize_handwriting_result.recognition_results:
             for line in text_result.lines:
+                s+=(line.text+' ')
                 print(line.text)
                 print(line.bounding_box)
+    return s
 
 def handwriting_recognition_url(url):
     recognize_handwriting_results = computervision_client.batch_read_file(url, raw=True)
@@ -310,15 +318,18 @@ def handwriting_recognition_url(url):
 
 def OCR_Recognition():
     get_image()
-    with open(local_image_path,'rb') as local_image:
-        ocr_result_local = computervision_client.recognize_printed_text_in_stream(local_image)
+    local_image = open(local_image_path,'rb') #as local_image:
+    ocr_result_local = computervision_client.recognize_printed_text_in_stream(local_image)
+    local_image.close()
+    s=''
     for region in ocr_result_local.regions:
         for line in region.lines:
             print("Bounding box: {}".format(line.bounding_box))
-            s = ""
+            s += "\n"
             for word in line.words:
                 s += word.text + " "
             print(s)
+    return s
 
 def OCR_Recognition_url(url):
     ocr_result_local = computervision_client.recognize_printed_text(url)
@@ -329,3 +340,7 @@ def OCR_Recognition_url(url):
             for word in line.words:
                 s += word.text + " "
             print(s)
+
+
+if __name__ == '__main__':
+    print([i.text for i in describe_image_local()])

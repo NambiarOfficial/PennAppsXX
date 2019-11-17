@@ -291,7 +291,9 @@ def home_automate(room,device,action):
 		print(r)
 
 def object_detect_pi():
-	items = search_object()
+	#items = search_object()
+	items = object_detection()
+	items = [item.object_property for item in items]
 	s = "You are looking at " + ','.join(items)
 	print(s)
 	t1 = threading.Thread(target=t2s, args=(s,))
@@ -325,7 +327,7 @@ modes = {
 	0:['Detect Face',face_detect_pi],
 	1:['Read Text',ocr],
 	2:['Event Description',event],
-	3:['Object Detect',object_detect_pi]
+	3:['Object Detect',object_detect_pi],
 	4:['Send SOS',send_sos],
 	5:['Pay merchant', payment]
 	}
