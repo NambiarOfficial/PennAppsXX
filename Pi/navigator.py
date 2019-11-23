@@ -4,7 +4,7 @@ import numpy as np
 import RPi.GPIO as GPIO
 # from face_detect import face_detect
 from t2s import t2s
-from event_description import event_description
+#from event_description import event_description
 from face_recognise import match_faces, train_faces
 from distance import get_ultrasonic
 from ewma import ewma, wma
@@ -62,7 +62,8 @@ inp1 = {'bathroom1':{
 				'signal': -50
 		}, 
 		'name': 'bathroom1'
-},'bathroom':{
+}
+,'bathroom':{
 		'signalAttenuation': 3, 
 		'location': {
 				'y': 0, 
@@ -113,8 +114,8 @@ def vibrate(d, direction='straight'):
 		prev_time_nav = time.time()
 		# else:
 			# s = str(int(d))+' '+direction
-		t1 = threading.Thread(target=t2s,args=(s,))
-		t1.start()
+		#t1 = threading.Thread(target=t2s,args=(s,))
+		#t1.start()
 	vib = -(d-cutoff_dist)*(vib_range)/d_range+vib_max
 	# print(vib)
 	if direction == 'left':
@@ -139,7 +140,9 @@ def navigate():
 	d = d_max
 	p_left.ChangeDutyCycle(0)
 	p_right.ChangeDutyCycle(0)
+	vibrate(10,'straight')
 	while d>cutoff_dist:
+		'''
 		plot_signals = []
 		try:
 			sig = r1.getAPinfo(sudo=True,networks=list(name_dict.values()))
@@ -149,9 +152,9 @@ def navigate():
 		for i in sig:
 			if i['ssid'] == networks[0]:
 				signals.append(i['signal'])
-			plot_signals.append(i['signal'])
+			#plot_signals.append(i['signal'])
 		print(sig)
-		print('Plot signals',plot_signals)
+		#print('Plot signals',plot_signals)
 		if len(signals) < 5:
 			continue
 		pos = r2.getNodePosition(plot_signals)
@@ -159,13 +162,13 @@ def navigate():
 		pos_dict['node']['x'] = float(pos[0])
 		pos_dict['node']['y'] = float(pos[1])
 		print(pos_dict)
-		requests.post('http://192.168.43.43:5000/positions',json=pos_dict)
+		#requests.post('http://192.168.43.43:5000/positions',json=pos_dict)
 		# d = weighted_avg(d,d1)
 		# dist.append(d1)
 		signals = signals[-5:]
 		# sig = wma(signals)
 		d = r2.getDistanceFromAP(inp1[name_dict[str(dest)]],signals[-1])['distance']
-		print('Sig,d',sig,d)
+		#print('Sig,d',sig,d)
 
 		direction_array = get_ultrasonic()
 		if direction_array is None:
@@ -176,11 +179,15 @@ def navigate():
 			direction = 'straight'
 		else:
 			direction = 'right'
-		# direction = 'straight'
-		print(direction)
-		vibrate(d,direction)
-
-
+		'''
+		#direction = 'straight'
+		#print(direction)
+		#vibrate(d,direction)
+		time.sleep(0.001)
+		t1 = threading.Thread(target=t2s,args=('Right',))
+		t1.start()
+		break
+	time.sleep(3.5)
 	# vibrate(d)
 	p_left.ChangeDutyCycle(0)
 	p_right.ChangeDutyCycle(0)
@@ -209,9 +216,9 @@ def face_detect_pi():
 	elif len(names['names']) == 1:
 		s = "I have found " + names['names'][0]+ " in front of you."
 		print(names['names'][0])
-		emo = emotion()
-		print(emo)
-		s += (" They seem to be " + emo[0])
+		#emo = emotion()
+		#print(emo)
+		#s += (" They seem to be " + emo[0])
 	else:
 		s = "I have found " + ",".join(names['names']) + " in front of you"
 	print(s)
@@ -246,8 +253,8 @@ def object_detect():
 		items = [item.object_property for item in items]
 		s = "You are looking at " + ','.join(items)
 	else:
-		loc = search_object(thing)
-		s = "You should find " + thing + "on the " + loc
+		s = object_detection(thing)
+		#s = "You should find " + thing + "on the " + loc
 	print(s)
 	t1 = threading.Thread(target=t2s, args=(s,))
 	t1.start()

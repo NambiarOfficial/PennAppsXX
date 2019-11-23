@@ -29,14 +29,21 @@ computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredenti
 #imageface=cv2.imread(local_image_path)
 #_,enc=cv2.imencode('.jpg',imageface)
 #image_data = enc.tobytes()
+x = 0
+y = 0
 
 def get_image():
+    global x,y
     cap = cv2.VideoCapture(0)
     _, capture = cap.read()
     cap.release()
-    #capture = cv2.flip(capture,-1)
+    print(_)
+    capture = cv2.flip(capture,-1)
     cv2.imwrite(local_image_path,capture)
     print('Pic taken')
+    x = np.shape(capture)[1]
+    y = np.shape(capture)[0]
+    print(x,y)
 
 def describe_image_local():
     get_image()
@@ -232,20 +239,49 @@ def image_types_url(url):
     else:
         print("Image is a line drawing")
 
-def object_detection():
+def object_detection(thing=None):
+    global x,y
     get_image()
     local_image = open(local_image_path,'rb') #as local_image:
     detect_objects_results_local = computervision_client.detect_objects_in_stream(local_image)
     local_image.close()
     if len(detect_objects_results_local.objects) == 0:
         print("No objects detected.")
-    else:
+    elif thing is None:
         return detect_objects_results_local.objects
         for objectsd in detect_objects_results_local.objects:
             print(objectsd.object_property)
             print("object at location {}, {}, {}, {}".format( \
             objectsd.rectangle.x, objectsd.rectangle.x + objectsd.rectangle.w, \
             objectsd.rectangle.y, objectsd.rectangle.y + objectsd.rectangle.h))
+    else:
+        res = "Could not find object"
+        for objectsd in detect_objects_results_local.objects:
+            if objectsd.object_property.lower() == thing:
+                cx =  int((objectsd.rectangle.x + objectsd.rectangle.x + objectsd.rectangle.w)/2)
+                cy =  int((objectsd.rectangle.y + objectsd.rectangle.y + objectsd.rectangle.h)/2)
+                found = [[thing,[cx,cy],[x,y]]]
+                res = "Object was found in " + locate(found)[0][1]
+        return res
+
+def locate(found):
+        global x,y
+        labels=['Top Right','Top Left','Bottom Right','Bottom Left','At the Center','Not sure if it is the same object']
+        #x,y=found[0][2]
+        final=[]
+        for objects in found:
+                        if (objects[1][0]>=0 and objects[1][0]<=int(x/2) and objects[1][1]>=0 and objects[1][1]<=int(y/2)):
+                                final.append([objects,labels[1]])
+                        elif (objects[1][0]>=int(x/2) and objects[1][0]<=x and objects[1][1]>=0 and objects[1][1]<=int(y/2)):
+                                final.append([objects,labels[0]])
+                        elif (objects[1][0]>=0 and objects[1][0]<=int(x/2) and objects[1][1]>=int(y/2) and objects[1][1]<=y):
+                                final.append([objects,labels[3]])
+                        elif (objects[1][0]>=int(x/2) and objects[1][0]<=x and objects[1][1]>=int(y/2) and objects[1][1]<=y):
+                                final.append([objects,labels[2]])
+                        if (objects[1][0]>=int(7*x/9) and objects[1][0]<=int(11*x/9) and objects[1][1]>=int(7*x/9) and objects[1][1]<=int(11*x/9)):
+                                final.append([objects,labels[4]])
+        return(final)
+
 
 def object_detection_url():
     detect_objects_results_local = computervision_client.detect_objects(url)
